@@ -1,0 +1,22 @@
+# https://hub.docker.com/_/postgres/tags
+FROM postgres:15.8
+
+# Install necessary packages
+RUN apt-get update && apt-get install -y ca-certificates && apt-get clean
+
+# Optional:
+## Copy and update certificates
+#COPY your-root-ca.cer /usr/local/share/ca-certificates/your-root-ca.crt
+#RUN update-ca-certificates
+#
+## PostgreSQL configuration - Use RootCA certificate for SSL connection
+#ENV PGSSLROOTCERT=/usr/local/share/ca-certificates/your-root-ca.crt
+#ENV PGSSLMODE=verify-ca
+
+#USER 1000
+
+# Enable SSL configuration if needed
+#COPY ./ca/server.crt /var/lib/postgresql/server.crt
+#COPY ./ca/server.key /var/lib/postgresql/server.key
+#RUN chown postgres /var/lib/postgresql/server.key && \
+#    chmod 600 /var/lib/postgresql/server.key

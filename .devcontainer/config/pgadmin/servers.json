@@ -1,0 +1,24 @@
+{
+  "Servers": {
+      "1": {
+          "Name": "db_primary",
+          "Group": "Servers",
+          "Host": "db_primary",
+          "Port": 5432,
+          "MaintenanceDB": "postgres",
+          "Username": "root",
+          "SSLMode": "prefer",
+          "PassFile": "/pgadmin4/.pgpass"
+      },
+      "2": {
+          "Name": "db_replica",
+          "Group": "Servers",
+          "Host": "db_replica",
+          "Port": 15432,
+          "MaintenanceDB": "postgres",
+          "Username": "root",
+          "SSLMode": "prefer",
+          "PassFile": "/pgadmin4/.pgpass"
+      }
+  }
+}

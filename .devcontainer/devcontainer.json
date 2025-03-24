@@ -1,0 +1,62 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/java-postgres
+{
+	"name": "Java & PostgreSQL",
+	"dockerComposeFile": "docker-compose.yml",
+	"service": "app",
+	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	// "features": {}
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// This can be used to network with other containers or with the host.
+	"forwardPorts": [
+		8080,5050
+	],
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": "bash .devcontainer/postCreateCommand.sh",
+
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root
+	"remoteUser": "vscode",
+	"customizations": {
+		"vscode": {
+			"settings": {
+				// bashでターミナルを起動
+				"terminal.integrated.defaultProfile.linux": "bash",
+				"editor.tabSize": 2,
+				"java.configuration.updateBuildConfiguration": "automatic",
+				"java.server.launchMode": "Standard",
+				"java.jdt.ls.java.home": "/usr/lib/jvm/java-21-amazon-corretto",
+				// check style
+				"checkstyle.configLocation": "checkstyle-rules.xml",
+				"checkstyle.enable": true,
+				"checkstyle.run": "onType",
+				"checkstyle.suppressWarnings": true,
+				"checkstyle.version": "10.21.4"
+			},			
+			"extensions": [
+				"ms-azuretools.vscode-docker",
+				"vscjava.vscode-java-pack",
+				"pivotal.vscode-boot-dev-pack",
+				"vscjava.vscode-spring-initializr",
+				"vscjava.vscode-gradle",
+				"gabrielbb.vscode-lombok",
+				"GitHub.copilot",
+				"GitHub.copilot-chat",
+				"EditorConfig.EditorConfig",
+				"dbaeumer.vscode-eslint",
+				"esbenp.prettier-vscode",
+				"vmware.vscode-boot-dev-pack",
+				"amazonwebservices.amazon-q-vscode",
+				"amazonwebservices.aws-toolkit-vscode",
+				"yzhang.markdown-all-in-one",
+				"yzane.markdown-pdf",
+				"shd101wyy.markdown-preview-enhanced",
+				"TakumiI.markdowntable",
+				"shengchen.vscode-checkstyle"
+			]
+		}
+	}
+}

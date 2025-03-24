@@ -1,0 +1,138 @@
+volumes:
+  postgres-data:
+  postgres-replicadata:
+  pgadmin:
+
+services:
+  app:
+    #container_name: javadev
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      # NOTE: POSTGRES_DB/USER/PASSWORD should match values in db container
+        POSTGRES_PASSWORD: <your-password-here>
+        POSTGRES_USER: root
+        POSTGRES_DB: postgres
+        #POSTGRES_HOSTNAME: postgresdb
+    volumes:
+      - ../..:/workspaces:cached
+      
+    # Overrides default command so things don't shut down after the process ends.
+    command: sleep infinity
+
+    # Use "networks" instead of "network_mode"
+    networks:
+      - dev_network
+
+    # Use "forwardPorts" in **devcontainer.json** to forward an app port locally. 
+    # (Adding the "ports" property to this file will not forward from a Codespace.)
+    # example api: http://localhost:8080/api/v1/public/greeting
+    ports:
+      - 8080:8080
+
+  db_primary:
+    #container_name: postgresdb
+    #image: postgres:latest
+    build:
+      context: .
+      dockerfile: DockerfilePostgreSQL
+    restart: unless-stopped
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./postgres/primary/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./postgres/primary/pg_hba.conf:/etc/postgresql/pg_hba.conf
+      - ./postgres/primary/init.sh:/docker-entrypoint-initdb.d/init.sh
+      - ./postgres/init/01_init.sql:/docker-entrypoint-initdb.d/01_init.sql
+    environment:
+      # NOTE: POSTGRES_DB/USER/PASSWORD should match values in app container
+      POSTGRES_PASSWORD: <your-password-here>
+      POSTGRES_USER: root
+      POSTGRES_DB: postgres
+    ports:
+      - 5432:5432
+    # Add "forwardPorts": ["5432"] to **devcontainer.json** to forward PostgreSQL locally.
+    # (Adding the "ports" property to this file will not forward from a Codespace.)
+    healthcheck:
+      test: pg_isready -d postgres
+      interval: 10s
+      timeout: 1s
+      retries: 5
+    networks:
+      - dev_network
+
+  db_replica:
+    build:
+      context: .
+      dockerfile: DockerfilePostgreSQL
+    restart: unless-stopped
+    entrypoint: /entrypoint.sh
+    volumes:
+      - postgres-replicadata:/var/lib/postgresql/data
+      - ./postgres/replica/entrypoint.sh:/entrypoint.sh
+      - ./postgres/replica/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./postgres/replica/pg_hba.conf:/etc/postgresql/pg_hba.conf
+      #- ./postgres/init/01_init.sql:/docker-entrypoint-initdb.d/01_init.sql
+    environment:
+      # NOTE: POSTGRES_DB/USER/PASSWORD should match values in app container
+      POSTGRES_PASSWORD: <your-password-here>
+      POSTGRES_USER: root
+      POSTGRES_DB: postgres
+    ports:
+      - 15432:5432
+    healthcheck:
+      test: pg_isready -d postgres
+      interval: 1s
+      timeout: 1s
+      retries: 5
+    depends_on:
+      db_primary:
+        condition: service_healthy
+    networks:
+      - dev_network
+
+  pgadmin4:
+# https://hub.docker.com/r/dpage/pgadmin4/tags
+# http://localhost:8000/login
+    image: dpage/pgadmin4:latest
+#    container_name: pgadmin4
+    ports:
+      - 5050:80
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+      - ./config/pgadmin/servers.json:/pgadmin4/servers.json
+      - ./config/pgadmin/preferences.json:/pgadmin4/preferences.json
+      - ./config/pgadmin/.pgpass:/pgadmin4/.pgpass:ro
+    environment:
+      PGADMIN_DEFAULT_EMAIL: sample@example.com
+      PGADMIN_DEFAULT_PASSWORD: <your-password-here>
+      # Skip the pgAdmin login screen
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+      PGADMIN_SERVER_JSON_FILE: /pgadmin4/servers.json
+      PGADMIN_PREFERENCES_JSON_FILE: /pgadmin4/preferences.json
+      PGADMIN_CONFIG_UPGRADE_CHECK_ENABLED: "False" # Disable upgrade check
+      PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: "False" # Disable enhanced cookie protection
+      PGADMIN_CONFIG_LOGIN_BANNER: |-
+        "<h4>Senzing demonstration</h4>
+        Although pgAdmin can be configured for security,
+        <br/>the following credentials are used for demonstration.
+        <ul>
+          <li><b>Username:</b> sample@example.com</li>
+          <li><b>Password:</b> p@ssword!</li>
+        </ul>"
+      PGADMIN_CONFIG_CONSOLE_LOG_LEVEL: "10"
+#    hostname: pgadmin4
+#    restart: always
+    links:
+      - db_primary
+      - db_replica
+    depends_on:
+      - db_primary
+      - db_replica
+    networks:
+      - dev_network
+
+networks:
+  dev_network:
+    driver: bridge
