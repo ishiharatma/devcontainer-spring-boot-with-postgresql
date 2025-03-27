@@ -4,8 +4,8 @@ FROM postgres:15.8
 # Install necessary packages
 RUN apt-get update && apt-get install -y ca-certificates && apt-get clean
 
-# Optional:
-## Copy and update certificates
+## optional, uncomment if neede: Place your certificate under the .devcontainer folder and rename it to your-root-ca.crt
+## Copy and update certificates for corporate proxy environments
 #COPY your-root-ca.cer /usr/local/share/ca-certificates/your-root-ca.crt
 #RUN update-ca-certificates
 #

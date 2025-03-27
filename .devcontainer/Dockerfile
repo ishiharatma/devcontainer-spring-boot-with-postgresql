@@ -13,9 +13,9 @@ ARG USER_GID=$USER_UID
 # Install necessary packages
 RUN yum install -y ca-certificates || yum install -y ca-certificates.noarch
 
-# Optional: 
-## Copy and update certificates
-#COPY your-root-ca.cer /usr/local/share/ca-certificates/your-root-ca.crt
+## optional, uncomment if neede: Place your certificate under the .devcontainer folder and rename it to your-root-ca.crt
+## Copy and update certificates for corporate proxy environments
+#COPY your-root-ca.crt /usr/local/share/ca-certificates/your-root-ca.crt
 #RUN update-ca-certificates || (mkdir -p /etc/pki/ca-trust/source/anchors/ && \
 #    cp /usr/local/share/ca-certificates/your-root-ca.crt /etc/pki/ca-trust/source/anchors/ && \
 #    update-ca-trust extract)
